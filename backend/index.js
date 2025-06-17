@@ -5,14 +5,14 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors({ origin: '*' }));
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.get('/', (req, res) => {
     res.send('Backend is working');
   });
 
 
-const NASA_API_KEY = 'd6dwPKQ0wCfGguG24IZCCsp4TNDaZFpPxuLJPdX3';
+const NASA_API_KEY = process.env.NASA_API_KEY || 'd6dwPKQ0wCfGguG24IZCCsp4TNDaZFpPxuLJPdX3';
 
 app.get('/api/apod', async (req, res) => {
   try {
