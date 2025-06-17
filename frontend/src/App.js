@@ -1,22 +1,28 @@
-import logo from './logo.svg';
+import React, { useEffect, useState } from 'react';
 import './App.css';
+
 function App() {
+  const [apod, setApod] = useState(null);
+
+  useEffect(() => {
+    fetch('http://localhost:3001/api/apod')
+      .then(res => res.json())
+      .then(data => setApod(data))
+      .catch(err => console.error(err));
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>NASA Astronomy Picture of the Day</h1>
+      {apod ? (
+        <div>
+          <h2>{apod.title}</h2>
+          <img src={apod.url} alt={apod.title} style={{ maxWidth: '600px' }} />
+          <p>{apod.explanation}</p>
+        </div>
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
 }
