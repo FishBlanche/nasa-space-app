@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 const backendURL = import.meta.env.VITE_APP_BACKEND_URL ;
 
-
 function App() {
   const [apodData, setApodData] = useState(null);
   const [loading, setLoading] = useState(false);
