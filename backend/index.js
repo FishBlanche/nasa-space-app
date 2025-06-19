@@ -29,6 +29,34 @@ app.get('/api/apod', async (req, res) => {
       }
 });
 
+app.get('/api/apod/recent', async (req, res) => {
+  const today = new Date();
+  const dates = [...Array(30)].map((_, i) => {
+    const d = new Date();
+    d.setDate(today.getDate() - i);
+    return d.toISOString().split('T')[0];
+  });
+
+  try {
+    const results = await Promise.all(
+      dates.map(date =>
+        axios.get(`https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}&date=${date}`)
+      )
+    );
+
+    const trendData = results.map(r => ({
+      date: r.data.date,
+      type: r.data.media_type,
+    }));
+
+    res.json(trendData.reverse()); // old -> new
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch recent data' });
+  }
+});
+
+
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
 });
