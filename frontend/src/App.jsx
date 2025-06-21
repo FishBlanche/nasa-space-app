@@ -1,198 +1,202 @@
-import { useEffect, useState, useCallback, useMemo, Suspense, lazy } from 'react';
-import axios from 'axios';
-
-const LineChart = lazy(() => import('./components/LineChart'));
+import { useState, lazy,Suspense,useCallback,useEffect,useMemo } from "react"
+import { format } from "date-fns"
+import { CalendarIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import axios from "axios"
+ 
+// 👉 懒加载 LineChart
+const LineChart = lazy(() => import("./components/LineChart"));
 
 const backendURL = import.meta.env.VITE_APP_BACKEND_URL;
 
-const App = () => {
+function App() {
   const [apodData, setApodData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
-  const [activeTab, setActiveTab] = useState('image');
-  const [aiSummary, setAiSummary] = useState('');
-  const [aiLoading, setAiLoading] = useState(false);
-  const [trendData, setTrendData] = useState([]);
+  const [error, setError] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
+  const [recentData, setRecentData] = useState([]);
 
-  const fetchAPOD = useCallback(async (date = '') => {
+  // 🔸 fetch APOD (single)
+  const fetchAPOD = useCallback(async (date = "") => {
     setLoading(true);
-    setError('');
+    setError("");
     try {
-      const response = await axios.get(`${backendURL}/api/apod${date ? `?date=${date}` : ''}`);
+      const response = await axios.get(`${backendURL}/api/apod${date ? `?date=${date}` : ""}`);
       setApodData(response.data);
     } catch (err) {
-      console.error(err);
-      setError('Failed to fetch data from NASA API.');
+      console.error('error is..',err);
+      setError(err.response.data.msg);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchAPOD();
-  }, [fetchAPOD]);
-
-  const handleDateChange = useCallback((e) => {
-    const newDate = e.target.value;
-    setSelectedDate(newDate);
-    fetchAPOD(newDate);
-  }, [fetchAPOD]);
-
-  const handleAIExplain = useCallback(async () => {
-    if (!apodData) return;
-    setAiLoading(true);
+  // 🔸 fetch Recent for Chart
+  const fetchRecentData = useCallback(async () => {
     try {
-      const response = await axios.post(
-        'https://api.openai.com/v1/chat/completions',
-        {
-          model: 'gpt-3.5-turbo',
-          messages: [
-            {
-              role: 'user',
-              content: `Summarize this NASA APOD in 1 short sentence:\n\n"${apodData.explanation}"`,
-            },
-          ],
-          temperature: 0.7,
-          max_tokens: 100,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
-          },
-        }
-      );
-
-      const aiText = response.data.choices[0].message.content.trim();
-      setAiSummary(aiText);
+      const response = await axios.get(`${backendURL}/api/apod/recent`);
+      setRecentData(response.data);
     } catch (err) {
-      console.error(err);
-      setAiSummary('AI failed to summarize.');
-    } finally {
-      setAiLoading(false);
+      console.error("Failed to fetch recent data.");
     }
-  }, [apodData]);
-
-  useEffect(() => {
-    const fetchTrend = async () => {
-      try {
-        const response = await axios.get(`${backendURL}/api/apod/recent`);
-        setTrendData(response.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchTrend();
   }, []);
 
-  const lineChartData = useMemo(() => {
-    return {
-      labels: trendData.map(item => item.date),
-      datasets: [
-        {
-          label: 'Media Type (1=image, 0=video)',
-          data: trendData.map(item => (item.type === 'image' ? 1 : 0)),
-          borderColor: '#3b82f6',
-          backgroundColor: '#3b82f6',
-        },
-      ],
-    };
-  }, [trendData]);
+  useEffect(() => {
+    fetchAPOD();
+    fetchRecentData();
+  }, [fetchAPOD, fetchRecentData]);
+
+  const handleDateChange = (e) => {
+    setSelectedDate(e.target.value);
+  };
+
+  const handleFetchByDate = () => {
+    if (selectedDate) {
+      fetchAPOD(selectedDate);
+    }
+  };
+
+  const formattedChartData = useMemo(() => {
+    if (!recentData.length) return [];
+    return recentData.map((item) => ({
+      date: item.date,
+      views: item.views || Math.floor(Math.random() * 100), // fallback if no views
+    }));
+  }, [recentData]);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center p-6 space-y-6">
-      <h1 className="text-4xl font-bold text-center">🌌 NASA Astronomy Picture of the Day</h1>
-      <div className="max-w-3xl w-full mx-auto">
+    <div className="min-h-screen w-full  flex flex-col">
+    {/* Header */}
+    <header className="w-full max-w-4xl mx-auto flex flex-col items-center py-6 px-4">
+      <h1 className="w-full text-4xl font-bold text-center mb-4">
+        NASA Astronomy Picture of the Day
+      </h1>
+      <Separator className="w-full" />
+    </header>
 
-      <div className=" flex justify-center space-x-4 mt-4">
-        <button
-          onClick={() => setActiveTab('image')}
-          className={`px-4 py-2 rounded ${activeTab === 'image' ? 'bg-blue-600' : 'bg-gray-700'}`}
-        >
-          Image
-        </button>
-        <button
-          onClick={() => setActiveTab('chart')}
-          className={`px-4 py-2 rounded ${activeTab === 'chart' ? 'bg-blue-600' : 'bg-gray-700'}`}
-        >
-          Chart
-        </button>
-      </div>
-</div>
-      {loading && <p className="text-xl animate-pulse mt-4">Loading...</p>}
+    {/* Main */}
+    <main className="flex-1 w-full flex flex-col items-center px-4">
+      <div className="w-full max-w-5xl flex flex-col flex-grow">
+        <Tabs defaultValue="image" className="flex flex-col flex-grow">
+          <TabsList className="flex justify-center mb-6">
+            <TabsTrigger value="image">Image</TabsTrigger>
+            <TabsTrigger value="chart">Chart</TabsTrigger>
+          </TabsList>
 
-      {error && <p className="text-red-400 text-lg mt-4">{error}</p>}
+          {/* Image tab */}
+          <TabsContent
+            value="image"
+            className="flex flex-col space-y-4 flex-grow"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">
+              <Label htmlFor="date" className="whitespace-nowrap">
+                Select Date:
+              </Label>
 
-      {activeTab === 'image' && apodData && !loading && (
-        <div className="max-w-3xl w-full bg-gray-800 p-6 rounded-lg shadow-lg mt-4">
-          {/* 日期选择器放到 image tab 里 */}
-          <div className="flex flex-col sm:flex-row items-center gap-4 mb-4">
-            <label className="text-lg">Select Date:</label>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={handleDateChange}
-              className="p-2 rounded bg-gray-800 border border-gray-700 text-white"
-              max={new Date().toISOString().split('T')[0]}
-            />
-          </div>
+              {/* DatePicker */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-[200px] justify-start text-left font-normal"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedDate ? (
+                      format(new Date(selectedDate), "yyyy-MM-dd")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={
+                      selectedDate ? new Date(selectedDate) : undefined
+                    }
+                    onSelect={(date) => {
+                      if (date) {
+                        const isoDate = format(date, "yyyy-MM-dd")
+                        handleDateChange({ target: { value: isoDate } })
+                      }
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
 
-          <h2 className="text-2xl font-semibold mb-2">{apodData.title}</h2>
-          <p className="text-sm text-gray-400 mb-4">{apodData.date}</p>
-
-          {apodData.media_type === 'image' ? (
-            <img
-              src={apodData.url}
-              alt={apodData.title}
-              className="rounded mb-4 w-full object-cover"
-              loading="lazy"
-            />
-          ) : (
-            <iframe
-              src={apodData.url}
-              title={apodData.title}
-              className="w-full h-64 mb-4 rounded"
-              frameBorder="0"
-              allow="encrypted-media"
-              allowFullScreen
-            ></iframe>
-          )}
-
-          <div className="flex space-x-4 mb-4">
-            <button
-              onClick={handleAIExplain}
-              className="px-4 py-2 rounded bg-purple-600 hover:bg-purple-700"
-              disabled={aiLoading}
-            >
-              {aiLoading ? 'Generating AI Summary...' : 'AI Explain'}
-            </button>
-          </div>
-
-          {aiSummary && (
-            <div className="bg-gray-700 p-4 rounded text-sm text-blue-300 mb-4">
-              💡 AI Summary: {aiSummary}
+              {/* Fetch button */}
+              <Button onClick={handleFetchByDate}>Fetch</Button>
             </div>
-          )}
 
-          <p className="text-gray-300 leading-relaxed">{apodData.explanation}</p>
-        </div>
-      )}
+            {loading ? (
+              <Skeleton className="w-full h-96 rounded-lg " />
+            ) : error ? (
+              <p className="text-red-500">{error}</p>
+            ) : apodData ? (
+              <Card className="w-full">
+                <CardHeader>
+                  <CardTitle className="text-center mb-2">
+                    {apodData.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {apodData.media_type === "image" ? (
+                    <img
+                      src={apodData.url}
+                      alt={apodData.title}
+                      className="w-full rounded-lg mb-4"
+                    />
+                  ) : (
+                    <iframe
+                      src={apodData.url}
+                      title={apodData.title}
+                      className="w-full h-96 rounded-lg mb-4"
+                      frameBorder="0"
+                      allow="autoplay; encrypted-media"
+                      allowFullScreen
+                    ></iframe>
+                  )}
+                  <p>{apodData.explanation}</p>
+                </CardContent>
+              </Card>
+            ) : null}
+          </TabsContent>
 
-      {activeTab === 'chart' && (
-        <div className="max-w-xl w-full bg-gray-800 p-6 rounded-lg shadow-lg mt-4">
-          <h2 className="text-2xl font-semibold mb-4">Media Type Trend (Last 30 Days)</h2>
-          <Suspense fallback={<p className="text-center">Loading chart...</p>}>
-            <LineChart data={lineChartData} />
-          </Suspense>
-        </div>
-      )}
-
-      <footer className="mt-10 text-gray-500 text-sm">
-        Built with React + Vite + Tailwind + Chart.js | NASA Open API
-      </footer>
-    </div>
-  );
-};
+          {/* Chart tab */}
+          <TabsContent
+            value="chart"
+            className="flex flex-col space-y-4 flex-grow"
+          >
+            <Card className="w-full">
+              <CardHeader>
+                <CardTitle>API Usage Over Time</CardTitle>
+              </CardHeader>
+              <CardContent className="relative w-full h-[400px]">
+                <Suspense
+                  fallback={
+                    <Skeleton className="w-full h-full rounded-lg" />
+                  }
+                >
+                  <LineChart data={formattedChartData} />
+                </Suspense>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </main>
+  </div>
+);
+}
 
 export default App;
+ 

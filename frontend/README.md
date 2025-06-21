@@ -1,12 +1,37 @@
-# React + Vite
+# NASA Astronomy Picture of the Day (APOD) Viewer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A simple React-based web app that allows users to view NASA's "Astronomy Picture of the Day" (APOD), with support for selecting a date and switching between image and chart modes.
 
-Currently, two official plugins are available:
+🚀 Built with React, Tailwind CSS, shadcn/ui components, and the NASA APOD API.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## 🌟 Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- 📅 Select any date to view corresponding APOD image
+- 📊 Chart view (optional) for related data visualizations
+- 💡 Skeleton loading placeholder while fetching data
+- 🎨 Clean and responsive UI with shadcn/ui and Tailwind CSS
+- ☀️ Dark mode support
+
+---
+
+## 🛠️ Tech Stack
+
+- [React](https://react.dev/)
+- [Vite](https://vitejs.dev/) (development server + bundler)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [shadcn/ui](https://ui.shadcn.com/) components
+- [NASA APOD API](https://api.nasa.gov/) — public space data API
+
+---
+
+## 📸 Demo Screenshot
+
+<img src="screenshot.png" alt="NASA APOD Viewer Screenshot" width="600" />
+
+---
+
+## 🚀 Getting Started
+
+ 
