@@ -15,20 +15,22 @@ app.get('/', (req, res) => {
 const NASA_API_KEY = process.env.NASA_API_KEY || 'd6dwPKQ0wCfGguG24IZCCsp4TNDaZFpPxuLJPdX3';
 
 app.get('/api/apod', async (req, res) => {
-    try {
-        const date = req.query.date;
-        const nasaUrl = `https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}${date ? `&date=${date}` : ''}`;
-    
-        console.log('📡 Fetching:', nasaUrl);
-    
-        const result = await axios.get(nasaUrl);
-        res.json(result.data);
-      } catch (err) {
-        console.error('❌ NASA API Error:', err.response?.status, err.response?.data || err.message);
-        res.status(err.response?.status || 500).json({ error: 'Failed to fetch data from NASA' });
-      }
+  const { date } = req.query;
+
+  const nasaUrl = `https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}${
+    date ? `&date=${date}` : ''
+  }`;
+
+  try {
+    const response = await axios.get(nasaUrl);
+    res.json(response.data);
+  } catch (err) {
+    console.error('Error fetching APOD:', err.response?.data || err.message);
+    res.status(500).json(err.response?.data);
+  }
 });
 
+// 🚀 GET /api/apod/recent  
 app.get('/api/apod/recent', async (req, res) => {
   const today = new Date();
   const dates = [...Array(30)].map((_, i) => {
@@ -40,19 +42,23 @@ app.get('/api/apod/recent', async (req, res) => {
   try {
     const results = await Promise.all(
       dates.map(date =>
-        axios.get(`https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}&date=${date}`)
+        axios.get(
+          `https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}&date=${date}`
+        )
       )
     );
 
+    // 返回的数据格式
     const trendData = results.map(r => ({
       date: r.data.date,
       type: r.data.media_type,
+      views: Math.floor(Math.random() * 100) + 20,    
     }));
 
-    res.json(trendData.reverse()); // old -> new
+    res.json(trendData.reverse());  
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to fetch recent data' });
+    console.error('Error fetching recent APOD:', err.response?.data || err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 
