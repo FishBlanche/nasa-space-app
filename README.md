@@ -18,7 +18,9 @@ A simple React-based web app to browse NASA's "Astronomy Picture of the Day" (AP
 ---
 
 ## 🛠️ Tech Stack
-
+- Frontend: **React + Vite + Tailwind CSS + shadcn/ui + Recharts**
+- Backend: **Node.js + Express** 
+- Deployment: **Vercel (Frontend)** + **Render (Backend)**
 - [React](https://react.dev/)
 - [Vite](https://vitejs.dev/)
 - [Tailwind CSS](https://tailwindcss.com/)
@@ -31,5 +33,29 @@ A simple React-based web app to browse NASA's "Astronomy Picture of the Day" (AP
 
 ![screenshot](./screenshot.jpg)
 
----
+## 🚀 Getting Started
 
+### Prerequisites
+
+- Node.js >= 18.x
+- npm >= 9.x
+
+### 1️⃣ Clone the Repository
+
+```bash
+git clone https://github.com/your-username/nasa-space-app.git
+cd nasa-space-app
+```
+### 1️⃣ Setup Backend
+```bash
+cd backend
+npm install
+npm start
+```
+
+### 1️⃣ Setup Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
