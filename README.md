@@ -13,6 +13,7 @@ A simple React-based web app to browse NASA's "Astronomy Picture of the Day" (AP
 - 📊 Chart view (optional) for related data visualization
 - 💡 Skeleton loading placeholder while fetching data
 - 🎨 Responsive UI with shadcn/ui + Tailwind CSS
+- 🚀 Lazy loading of components and API data (Performance optimization)
 
 ---
 
@@ -28,7 +29,7 @@ A simple React-based web app to browse NASA's "Astronomy Picture of the Day" (AP
 
 ## 📸 Demo Screenshot
 
-![screenshot](./screenshot.png)
+![screenshot](./screenshot.jpg)
 
 ---
 
