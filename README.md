@@ -46,14 +46,15 @@ A simple React-based web app to browse NASA's "Astronomy Picture of the Day" (AP
 git clone https://github.com/your-username/nasa-space-app.git
 cd nasa-space-app
 ```
-### 1️⃣ Setup Backend
+### 2️⃣ Setup Backend   
+
 ```bash
 cd backend
 npm install
 npm start
 ```
 
-### 1️⃣ Setup Frontend
+### 3️⃣ Setup Frontend
 ```bash
 cd frontend
 npm install
