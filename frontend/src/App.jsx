@@ -16,7 +16,8 @@ import axios from "axios"
 const LineChart = lazy(() => import("./components/LineChart"));
 
 const backendURL = import.meta.env.VITE_APP_BACKEND_URL;
-
+//const backendURL = process.env.VITE_APP_BACKEND_URL;
+ 
 function App() {
   const [apodData, setApodData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -32,7 +33,7 @@ function App() {
       const response = await axios.get(`${backendURL}/api/apod${date ? `?date=${date}` : ""}`);
       setApodData(response.data);
     } catch (err) {
-      console.error('error is..',err);
+   //   console.error('error is..',err);
       setError(err.response.data.msg);
     } finally {
       setLoading(false);
