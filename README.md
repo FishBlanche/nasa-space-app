@@ -60,3 +60,18 @@ cd frontend
 npm install
 npm run dev
 ```
+## 🧪 Testing
+
+### 1️⃣ Unit Tests (Jest + React Testing Library)
+
+- Frontend unit tests are written using [Jest](https://jestjs.io/) and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/).
+- The following components and pages are covered with unit tests:
+  - `Button` component (basic rendering)
+  - Main `App.jsx` (mock API calls with axios and test title rendering)
+
+### Example test command:
+
+```bash
+cd frontend
+npm run test
+```
